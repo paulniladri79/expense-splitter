@@ -3,21 +3,23 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Expense Splitter — Editable</title>
+  <title>Expense Splitter — Light Theme</title>
   <style>
     :root{
-      --bg:#0f1724;
-      --card:#0b1220;
-      --muted:#9aa4b2;
-      --glass: rgba(255,255,255,0.04);
-      --accent1:#7c3aed;
-      --accent2:#06b6d4;
-      --accent3:#ff7a59;
-      --success:#22c55e;
-      --danger:#ef4444;
-      --glass-border: rgba(255,255,255,0.06);
-      --radius:14px;
-      --shadow: 0 8px 30px rgba(2,6,23,0.6);
+      --bg: #f7fafc;              /* page background */
+      --card: #ffffff;            /* card background */
+      --muted: #6b7280;           /* muted text */
+      --glass: rgba(2,6,23,0.02); /* subtle glass */
+      --accent1: #7c3aed;         /* purple */
+      --accent2: #06b6d4;         /* teal */
+      --accent3: #ff7a59;         /* orange */
+      --success: #16a34a;         /* green */
+      --danger: #ef4444;          /* red */
+      --glass-border: rgba(15,23,42,0.06);
+      --radius: 14px;
+      --shadow: 0 6px 20px rgba(2,6,23,0.06);
+      --text: #0f1724;            /* primary text */
+      --muted-bg: #f3f4f6;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -25,63 +27,69 @@
       margin:0;
       font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
       background:
-        radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.12), transparent 8%),
-        radial-gradient(1000px 500px at 90% 90%, rgba(6,182,212,0.08), transparent 10%),
+        radial-gradient(800px 360px at 10% 10%, rgba(124,58,237,0.04), transparent 8%),
+        radial-gradient(700px 300px at 90% 90%, rgba(6,182,212,0.03), transparent 10%),
         var(--bg);
-      color:#e6eef8;
+      color:var(--text);
       padding:28px;
     }
 
     header{display:flex;gap:16px;align-items:center;margin-bottom:20px}
-    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(12,18,40,0.6);flex-shrink:0}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(12,18,40,0.06);flex-shrink:0}
     h1{font-size:20px;margin:0}
     .subtitle{color:var(--muted);font-size:13px;margin-top:4px}
 
     .wrap{max-width:1100px;margin:0 auto;display:grid;gap:18px;grid-template-columns:1fr}
     @media(min-width:980px){.wrap{grid-template-columns:420px 1fr}}
 
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);backdrop-filter: blur(6px)}
+    .card{background:var(--card);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);backdrop-filter: blur(6px)}
     .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .section-title h2{margin:0;font-size:16px}
     .muted{color:var(--muted);font-size:13px}
 
     .input-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px}
     .input-row .two{grid-template-columns:1fr 1fr auto;display:grid;gap:8px}
-    input[type="text"], input[type="number"], select, textarea{background:transparent;border:1px solid var(--glass-border);padding:10px;border-radius:10px;color:inherit;outline:none;font-size:14px}
+    input[type="text"], input[type="number"], select, textarea{background:transparent;border:1px solid var(--glass-border);padding:10px;border-radius:10px;color:var(--text);outline:none;font-size:14px}
     textarea{min-height:120px;resize:vertical}
 
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;border:1px solid transparent;cursor:pointer;font-weight:600;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));transition:transform .12s ease}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;border:1px solid transparent;cursor:pointer;font-weight:600;background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01));transition:transform .12s ease}
     .btn:active{transform:translateY(1px)}
     .btn.ghost{background:transparent;border:1px solid var(--glass-border);color:var(--muted)}
-    .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#041018}
+    .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#fff}
     .btn.warn{background:linear-gradient(90deg,var(--accent3),#ffb199);color:#2b0b00}
     .btn.danger{background:linear-gradient(90deg,#ff6b6b,#ef4444);color:#2b0b00}
 
     .contributors-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-    .chip{padding:8px 10px;border-radius:999px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid var(--glass-border);font-weight:600;cursor:pointer}
+    .chip{padding:8px 10px;border-radius:999px;background:var(--muted-bg);border:1px solid var(--glass-border);font-weight:600;cursor:pointer;color:var(--text)}
     .chip small{display:block;color:var(--muted);font-weight:500;font-size:12px}
 
     table{width:100%;border-collapse:collapse;margin-top:12px}
-    th,td{padding:10px;text-align:left;border-bottom:1px dashed rgba(255,255,255,0.03);font-size:14px}
+    th,td{padding:10px;text-align:left;border-bottom:1px dashed rgba(15,23,42,0.04);font-size:14px}
     th{color:var(--muted);font-weight:600}
     .table-actions button{padding:6px 8px;border-radius:8px;border:0;background:transparent;color:var(--muted);cursor:pointer}
-    .table-actions button:hover{color:#fff}
+    .table-actions button:hover{color:var(--text)}
 
     .pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    .pill{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:8px 10px;border-radius:999px;border:1px solid var(--glass-border);font-weight:700}
+    .pill{background:linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.01));padding:8px 10px;border-radius:999px;border:1px solid var(--glass-border);font-weight:700;color:var(--text)}
 
     .settlement-list{margin-top:12px}
-    .settlement-list li{padding:8px;border-radius:8px;background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));margin-bottom:8px}
+    .settlement-list li{padding:8px;border-radius:8px;background:linear-gradient(90deg, rgba(2,6,23,0.02), rgba(2,6,23,0.00));margin-bottom:8px;color:var(--text)}
 
     .export-area{display:grid;gap:8px}
-    .json-area{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size:13px; color:#cfe9ff; background:rgba(0,0,0,0.12); padding:12px; border-radius:10px; border:1px dashed rgba(255,255,255,0.03); min-height:120px; overflow:auto}
+    .json-area{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size:13px; color:#0f1724; background:var(--muted-bg); padding:12px; border-radius:10px; border:1px dashed #e6e9ef; min-height:120px; overflow:auto}
 
-    .dropzone{margin-top:10px;padding:18px;border-radius:12px;border:2px dashed rgba(255,255,255,0.04);text-align:center;color:var(--muted);transition:all .12s ease;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
-    .dropzone.drag{border-color:rgba(124,58,237,0.9);box-shadow:0 8px 30px rgba(124,58,237,0.06);color:#fff}
+    .dropzone{margin-top:10px;padding:18px;border-radius:12px;border:2px dashed #e6e9ef;text-align:center;color:var(--muted);transition:all .12s ease;background:var(--card)}
+    .dropzone.drag{border-color:var(--accent1);box-shadow:0 8px 30px rgba(124,58,237,0.06);color:var(--text)}
 
     footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
 
     #confettiCanvas{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999}
+
+    /* small responsive tweaks */
+    @media(max-width:520px){
+      .input-row.two{grid-template-columns:1fr;gap:8px}
+      .input-row{grid-template-columns:1fr;gap:8px}
+    }
   </style>
 </head>
 <body>
@@ -89,14 +97,14 @@
 
   <header>
     <div class="logo" aria-hidden="true">
-      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <rect x="2" y="2" width="20" height="20" rx="5" fill="white" opacity="0.06"/>
         <path d="M7 12h10M7 8h10M7 16h6" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
     <div>
       <h1>Expense Splitter</h1>
-      <div class="subtitle">Now editable — click Edit on an expense or double-click a contributor to rename</div>
+      <div class="subtitle">Light theme — click Edit on an expense or double-click a contributor to rename</div>
     </div>
   </header>
 
@@ -122,7 +130,7 @@
         <button class="btn ghost" onclick="prefillSample()">Sample data</button>
       </div>
 
-      <hr style="border:none;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.02),transparent);margin:16px 0">
+      <hr style="border:none;height:1px;background:linear-gradient(90deg,transparent,rgba(15,23,42,0.04),transparent);margin:16px 0">
 
       <div class="section-title">
         <h2>Add / Edit expense</h2>
@@ -180,7 +188,7 @@
         <pre id="jsonOutput" class="json-area" aria-live="polite"></pre>
       </div>
 
-      <hr style="border:none;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.02),transparent);margin:16px 0">
+      <hr style="border:none;height:1px;background:linear-gradient(90deg,transparent,rgba(15,23,42,0.04),transparent);margin:16px 0">
 
       <div class="section-title">
         <h2>Import</h2>
@@ -261,6 +269,7 @@
       nameInput.value = '';
       renderContributors();
       updateSummary();
+      exportJSON();
     }
 
     function editContributor(index){
