@@ -3,23 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Expense Splitter</title>
+  <title>Expense Splitter — Light Theme (Full)</title>
   <style>
     :root{
-      --bg: #f7fafc;              /* page background */
-      --card: #ffffff;            /* card background */
-      --muted: #6b7280;           /* muted text */
-      --glass: rgba(2,6,23,0.02); /* subtle glass */
-      --accent1: #7c3aed;         /* purple */
-      --accent2: #06b6d4;         /* teal */
-      --accent3: #ff7a59;         /* orange */
-      --success: #16a34a;         /* green */
-      --danger: #ef4444;          /* red */
+      --bg: #f7fafc;
+      --card: #ffffff;
+      --muted: #6b7280;
       --glass-border: rgba(15,23,42,0.06);
-      --radius: 14px;
-      --shadow: 0 6px 20px rgba(2,6,23,0.06);
-      --text: #0f1724;            /* primary text */
+      --accent1: #7c3aed;
+      --accent2: #06b6d4;
+      --accent3: #ff7a59;
+      --success: #16a34a;
+      --danger: #ef4444;
+      --text: #0f1724;
       --muted-bg: #f3f4f6;
+      --radius: 12px;
+      --shadow: 0 6px 20px rgba(2,6,23,0.06);
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -85,7 +84,36 @@
 
     #confettiCanvas{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999}
 
-    /* small responsive tweaks */
+    /* Import area improvements */
+    .import-wrap{display:grid;gap:10px}
+    .import-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .import-controls .muted{font-size:13px;color:var(--muted)}
+    textarea#importJson{
+      width:100%;
+      min-height:160px;
+      max-height:420px;
+      resize:vertical;
+      padding:12px 14px;
+      border-radius:10px;
+      border:1px solid #e6e9ef;
+      background:linear-gradient(180deg, #ffffff, #fbfdff);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+      font-size:13px;
+      color:var(--text);
+      line-height:1.45;
+      outline:none;
+      box-shadow: inset 0 1px 0 rgba(0,0,0,0.02);
+    }
+    textarea#importJson::placeholder{color:#9aa4b2}
+    textarea#importJson.invalid{border-color:#fca5a5; box-shadow: 0 0 0 4px rgba(254,202,202,0.06);}
+    .json-hint{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+    .json-actions{display:flex;gap:8px;margin-left:auto}
+    .status{font-size:13px;padding:8px 10px;border-radius:8px;background:#f8fafc;border:1px solid #eef2ff;color:var(--muted)}
+    .status.ok{border-color:#bbf7d0;background:linear-gradient(180deg,#ecfdf5,#f8fffb);color:#065f46}
+    .status.err{border-color:#fecaca;background:linear-gradient(180deg,#fff1f2,#fff8f9);color:#991b1b}
+    .small{font-size:12px;color:var(--muted)}
+    .prettify-note{font-size:12px;color:var(--muted);margin-top:6px}
+
     @media(max-width:520px){
       .input-row.two{grid-template-columns:1fr;gap:8px}
       .input-row{grid-template-columns:1fr;gap:8px}
@@ -104,7 +132,7 @@
     </div>
     <div>
       <h1>Expense Splitter</h1>
-      <div class="subtitle">Light theme — click Edit on an expense or double-click a contributor to rename</div>
+      <div class="subtitle">Light theme — improved JSON import/editor included</div>
     </div>
   </header>
 
@@ -195,11 +223,27 @@
         <div class="muted">Paste or drop a saved file</div>
       </div>
 
-      <textarea id="jsonInput" placeholder='Paste JSON here to import' style="margin-top:12px"></textarea>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn" onclick="importFromText()">Import from text</button>
-        <input id="jsonFile" type="file" accept="application/json" style="display:inline-block" />
-        <button class="btn" onclick="importFromFile()">Import from file</button>
+      <div class="import-wrap" style="margin-top:12px">
+        <div class="import-controls" role="toolbar" aria-label="Import controls">
+          <div class="json-hint">
+            <span class="muted">Paste JSON below</span>
+          </div>
+
+          <div class="json-actions" aria-hidden="false">
+            <button class="btn ghost" id="validateBtn" title="Validate JSON">Validate</button>
+            <button class="btn" id="prettifyBtn" title="Prettify JSON">Prettify</button>
+            <button class="btn primary" id="importBtn" title="Import JSON">Import</button>
+            <input id="importFile" type="file" accept="application/json" style="display:none" />
+            <button class="btn" id="chooseFileBtn">Choose file</button>
+          </div>
+        </div>
+
+        <textarea id="importJson" placeholder='Paste JSON here to import. Example: {"contributors":["Aisha"],"expenses":[{"desc":"Dinner","amount":120,"by":"Aisha"}]}' aria-label="JSON import area"></textarea>
+
+        <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+          <div id="statusMsg" class="status small" style="display:none"></div>
+          <div class="prettify-note small muted">Tip: use <strong>Prettify</strong> to format pasted JSON before importing. Shortcut: Ctrl/Cmd+Enter to import.</div>
+        </div>
       </div>
 
       <div id="dropzone" class="dropzone" style="margin-top:12px">Drag & drop <strong>expenses.json</strong> here</div>
@@ -222,7 +266,13 @@
     const settlementList = document.getElementById('settlementList');
     const totalsBar = document.getElementById('totalsBar');
     const jsonOutput = document.getElementById('jsonOutput');
-    const jsonInput = document.getElementById('jsonInput');
+    const importJson = document.getElementById('importJson');
+    const importFile = document.getElementById('importFile');
+    const chooseFileBtn = document.getElementById('chooseFileBtn');
+    const validateBtn = document.getElementById('validateBtn');
+    const prettifyBtn = document.getElementById('prettifyBtn');
+    const importBtn = document.getElementById('importBtn');
+    const statusMsg = document.getElementById('statusMsg');
     const dropzone = document.getElementById('dropzone');
     const confettiCanvas = document.getElementById('confettiCanvas');
     const addSaveBtn = document.getElementById('addSaveBtn');
@@ -324,9 +374,6 @@
       editingExpenseIndex = i;
       addSaveBtn.textContent = 'Save';
       cancelEditBtn.style.display = 'inline-flex';
-      addSaveBtn.classList.remove('primary');
-      addSaveBtn.classList.add('primary');
-      // focus desc
       document.getElementById('expenseDesc').focus();
     }
 
@@ -440,42 +487,84 @@
       runConfetti();
     }
 
-    function importFromText(){
-      const text = jsonInput.value.trim();
-      if(!text) { alert('Paste JSON into the textarea first'); return; }
+    function validateJsonText(text){
       try{
-        const data = JSON.parse(text);
-        loadData(data);
-      }catch(e){ alert('Invalid JSON'); }
+        const parsed = JSON.parse(text);
+        if(!parsed || typeof parsed !== 'object') return {ok:false, msg:'Top-level JSON must be an object.'};
+        if(!Array.isArray(parsed.contributors) || !Array.isArray(parsed.expenses)) {
+          return {ok:false, msg:'JSON should include "contributors" (array) and "expenses" (array).'};
+        }
+        return {ok:true, data:parsed};
+      }catch(e){
+        return {ok:false, msg: e.message};
+      }
     }
 
-    function importFromFile(){
-      const fileInput = document.getElementById('jsonFile');
-      if(!fileInput.files || !fileInput.files.length){ alert('Choose a file first'); return; }
-      const file = fileInput.files[0];
+    function showStatus(text, type='info'){
+      statusMsg.style.display = 'inline-block';
+      statusMsg.textContent = text;
+      statusMsg.className = 'status small';
+      if(type === 'ok') statusMsg.classList.add('ok');
+      if(type === 'err') statusMsg.classList.add('err');
+    }
+
+    function clearStatus(){
+      statusMsg.style.display = 'none';
+      statusMsg.textContent = '';
+      statusMsg.className = 'status small';
+    }
+
+    validateBtn.addEventListener('click', () => {
+      const text = importJson.value.trim();
+      if(!text){ importJson.classList.add('invalid'); showStatus('No JSON to validate', 'err'); return; }
+      const res = validateJsonText(text);
+      if(res.ok){ importJson.classList.remove('invalid'); showStatus('Valid JSON — ready to import', 'ok'); }
+      else { importJson.classList.add('invalid'); showStatus('Invalid JSON: ' + res.msg, 'err'); }
+    });
+
+    prettifyBtn.addEventListener('click', () => {
+      const text = importJson.value.trim();
+      if(!text) { showStatus('Nothing to prettify', 'err'); return; }
+      try{
+        const parsed = JSON.parse(text);
+        importJson.value = JSON.stringify(parsed, null, 2);
+        importJson.classList.remove('invalid');
+        showStatus('JSON formatted', 'ok');
+      }catch(e){
+        importJson.classList.add('invalid');
+        showStatus('Cannot prettify: ' + e.message, 'err');
+      }
+    });
+
+    importBtn.addEventListener('click', () => {
+      const text = importJson.value.trim();
+      if(!text){ showStatus('Paste JSON before importing', 'err'); importJson.classList.add('invalid'); return; }
+      const res = validateJsonText(text);
+      if(!res.ok){ importJson.classList.add('invalid'); showStatus('Import failed: ' + res.msg, 'err'); return; }
+      importJson.classList.remove('invalid');
+      clearStatus();
+      loadData(res.data);
+      showStatus('Imported successfully', 'ok');
+    });
+
+    chooseFileBtn.addEventListener('click', () => importFile.click());
+    importFile.addEventListener('change', () => {
+      const file = importFile.files && importFile.files[0];
+      if(!file) return;
       const reader = new FileReader();
       reader.onload = e => {
-        try{
-          const data = JSON.parse(e.target.result);
-          loadData(data);
-        }catch(err){ alert('Invalid JSON file'); }
+        importJson.value = e.target.result;
+        showStatus('File loaded into editor — validate or prettify before import', 'ok');
       };
       reader.readAsText(file);
-    }
+    });
 
-    function loadData(data){
-      contributors = Array.isArray(data.contributors) ? data.contributors.slice() : [];
-      expenses = Array.isArray(data.expenses) ? data.expenses.map(x=>({desc:x.desc, amount: Number(x.amount), by:x.by})) : [];
-      editingExpenseIndex = -1;
-      addSaveBtn.textContent = 'Add';
-      cancelEditBtn.style.display = 'none';
-      renderContributors();
-      renderExpenses();
-      updateSummary();
-      exportJSON();
-    }
+    importJson.addEventListener('input', () => {
+      importJson.classList.remove('invalid');
+      clearStatus();
+    });
 
-    // Drag & drop
+    // Drag & drop for import file
     ['dragenter','dragover'].forEach(evt => {
       dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add('drag'); });
     });
@@ -488,13 +577,23 @@
       if(!file) return;
       const reader = new FileReader();
       reader.onload = ev => {
-        try{
-          const data = JSON.parse(ev.target.result);
-          loadData(data);
-        }catch(err){ alert('Invalid JSON file'); }
+        importJson.value = ev.target.result;
+        showStatus('File loaded into editor — validate or prettify before import', 'ok');
       };
       reader.readAsText(file);
     });
+
+    function loadData(data){
+      contributors = Array.isArray(data.contributors) ? data.contributors.slice() : [];
+      expenses = Array.isArray(data.expenses) ? data.expenses.map(x=>({desc:x.desc, amount: Number(x.amount), by:x.by})) : [];
+      editingExpenseIndex = -1;
+      addSaveBtn.textContent = 'Add';
+      cancelEditBtn.style.display = 'none';
+      renderContributors();
+      renderExpenses();
+      updateSummary();
+      exportJSON();
+    }
 
     // sample data
     function prefillSample(){
@@ -561,6 +660,11 @@
       frame();
     }
 
+    // keyboard shortcut: Ctrl/Cmd+Enter to import
+    importJson.addEventListener('keydown', (ev) => {
+      if((ev.ctrlKey || ev.metaKey) && ev.key === 'Enter'){ ev.preventDefault(); importBtn.click(); }
+    });
+
     // initial render
     renderContributors();
     renderExpenses();
@@ -575,4 +679,3 @@
   </script>
 </body>
 </html>
-
